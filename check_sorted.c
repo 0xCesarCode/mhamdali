@@ -38,15 +38,8 @@ int	check_sorted(t_node *stack)
 	return (1);
 }
 
-void	sort_three(t_node **stack_a)
+static void	handle_first_cases(t_node **stack_a, int first, int second, int third)
 {
-	int	first;
-	int	second;
-	int	third;
-
-	first = (*stack_a)->data;
-	second = (*stack_a)->next->data;
-	third = (*stack_a)->next->next->data;
 	if (first > second && second < third && first < third)
 		sa(stack_a, 0);
 	else if (first > second && second > third)
@@ -56,7 +49,11 @@ void	sort_three(t_node **stack_a)
 	}
 	else if (first > second && second < third && first > third)
 		rotate(stack_a, 0);
-	else if (first < second && second > third && first < third)
+}
+
+static void	handle_second_cases(t_node **stack_a, int first, int second, int third)
+{
+	if (first < second && second > third && first < third)
 	{
 		sa(stack_a, 0);
 		rotate(stack_a, 0);
@@ -67,6 +64,19 @@ void	sort_three(t_node **stack_a)
 		rotate(stack_a, 0);
 		sa(stack_a, 0);
 	}
+}
+
+void	sort_three(t_node **stack_a)
+{
+	int	first;
+	int	second;
+	int	third;
+
+	first = (*stack_a)->data;
+	second = (*stack_a)->next->data;
+	third = (*stack_a)->next->next->data;
+	handle_first_cases(stack_a, first, second, third);
+	handle_second_cases(stack_a, first, second, third);
 }
 
 void	check_sorted_range(t_node **stack_a, t_node **stack_b)

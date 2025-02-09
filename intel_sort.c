@@ -28,13 +28,8 @@ int	ft_list_size(t_node *begin_list)
 	return (i);
 }
 
-int	find_max_index(t_node **stack_a, int *max)
+static void	get_max_value(t_node *temp, int *max)
 {
-	int		index;
-	t_node	*temp;
-
-	index = 0;
-	temp = *stack_a;
 	*max = temp->data;
 	while (temp)
 	{
@@ -42,6 +37,16 @@ int	find_max_index(t_node **stack_a, int *max)
 			*max = temp->data;
 		temp = temp->next;
 	}
+}
+
+int	find_max_index(t_node **stack_a, int *max)
+{
+	int		index;
+	t_node	*temp;
+
+	index = 0;
+	temp = *stack_a;
+	get_max_value(temp, max);
 	temp = (*stack_a);
 	while (temp)
 	{
@@ -53,11 +58,19 @@ int	find_max_index(t_node **stack_a, int *max)
 	return (index);
 }
 
+static void	swap_array_elements(int *array, int j)
+{
+	int	temp;
+
+	temp = array[j];
+	array[j] = array[j + 1];
+	array[j + 1] = temp;
+}
+
 void	sort_array(int *array, int size, int k)
 {
 	int	i;
 	int	j;
-	int	temp;
 
 	i = 0;
 	while (i < size - 1)
@@ -66,42 +79,33 @@ void	sort_array(int *array, int size, int k)
 		while (j < size - i - 1)
 		{
 			if (k == 0 && array[j] > array[j + 1])
-			{
-				temp = array[j];
-				array[j] = array[j + 1];
-				array[j + 1] = temp;
-			}
+				swap_array_elements(array, j);
 			if (k == 2 && array[j] < array[j + 1])
-			{
-				temp = array[j];
-				array[j] = array[j + 1];
-				array[j + 1] = temp;
-			}
+				swap_array_elements(array, j);
 			j++;
 		}
 		i++;
 	}
 }
 
-void	index_nodes(t_node **stack_a)
+static void	fill_array(t_node *temp, int *array, int size)
 {
-	int		i;
-	int		size;
-	t_node	*temp;
-	int		check;
-	int		array[10000];
+	int	i;
 
-	temp = (*stack_a);
 	i = 0;
-	size = ft_list_size(*stack_a);
 	while (i < size)
 	{
 		array[i] = temp->data;
 		i++;
 		temp = temp->next;
 	}
-	check = is_sorted(*stack_a);
-	sort_array(array, ft_list_size(*stack_a), check);
+}
+
+static void	assign_indices(t_node **stack_a, int *array, int size)
+{
+	int		i;
+	t_node	*temp;
+
 	i = 0;
 	while (i < size)
 	{
@@ -116,14 +120,26 @@ void	index_nodes(t_node **stack_a)
 	}
 }
 
-void	intel_sort(t_node **stack_a, t_node **stack_b, int range)
+void	index_nodes(t_node **stack_a)
+{
+	int		size;
+	t_node	*temp;
+	int		check;
+	int		array[10000];
+
+	temp = (*stack_a);
+	size = ft_list_size(*stack_a);
+	fill_array(temp, array, size);
+	check = is_sorted(*stack_a);
+	sort_array(array, ft_list_size(*stack_a), check);
+	assign_indices(stack_a, array, size);
+}
+
+static void	process_stack_a(t_node **stack_a, t_node **stack_b, int range)
 {
 	int	size;
-	int	index_max;
-	int	max;
 
 	size = ft_list_size(*stack_a);
-	index_nodes(stack_a);
 	while (size != 0)
 	{
 		if ((*stack_a)->index <= ft_list_size(*stack_b))
@@ -137,6 +153,14 @@ void	intel_sort(t_node **stack_a, t_node **stack_b, int range)
 			ra(stack_a, 0);
 		size = ft_list_size(*stack_a);
 	}
+}
+
+static void	process_stack_b(t_node **stack_a, t_node **stack_b)
+{
+	int	size;
+	int	index_max;
+	int	max;
+
 	size = ft_list_size(*stack_b);
 	while (size)
 	{
@@ -150,4 +174,11 @@ void	intel_sort(t_node **stack_a, t_node **stack_b, int range)
 		pa(stack_b, stack_a, 0);
 		size = ft_list_size(*stack_b);
 	}
+}
+
+void	intel_sort(t_node **stack_a, t_node **stack_b, int range)
+{
+	index_nodes(stack_a);
+	process_stack_a(stack_a, stack_b, range);
+	process_stack_b(stack_a, stack_b);
 }
